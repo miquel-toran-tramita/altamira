@@ -1,4 +1,32 @@
 <script>
+  let status = $state(""); // "", "sending", "success", "error"
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+    status = "sending";
+
+    const form = event.target;
+    const data = new FormData(form);
+
+    try {
+      const response = await fetch(form.action, {
+        method: form.method,
+        body: data,
+        headers: {
+          Accept: "application/json",
+        },
+      });
+
+      if (response.ok) {
+        status = "success";
+        form.reset();
+      } else {
+        status = "error";
+      }
+    } catch (error) {
+      status = "error";
+    }
+  }
 </script>
 
 <div class="contact-container">
@@ -29,38 +57,59 @@
   </div>
 
   <div class="contact-form">
-    <form onsubmit={(e) => e.preventDefault()}>
-      <div class="form-group">
-        <label for="name">Nombre completo</label>
-        <input
-          type="text"
-          id="name"
-          name="name"
-          placeholder="Tu nombre..."
-          required
-        />
+    {#if status === "success"}
+      <div class="success-message">
+        <h5>¡Mensaje enviado!</h5>
+        <p>
+          Gracias por contactar con nosotros. Te responderemos lo antes posible.
+        </p>
+        <button onclick={() => (status = "")}>Enviar otro mensaje</button>
       </div>
-      <div class="form-group">
-        <label for="email">Correo electrónico</label>
-        <input
-          type="email"
-          id="email"
-          name="email"
-          placeholder="tu@email.com"
-          required
-        />
-      </div>
-      <div class="form-group">
-        <label for="message">Mensaje</label>
-        <textarea
-          id="message"
-          name="message"
-          placeholder="Cuéntanos más sobre tu proyecto..."
-          required
-        ></textarea>
-      </div>
-      <button type="submit">Enviar mensaje</button>
-    </form>
+    {:else}
+      <form
+        action="https://formspree.io/f/xqkgnzbr"
+        method="POST"
+        onsubmit={handleSubmit}
+      >
+        <div class="form-group">
+          <label for="name">Nombre completo</label>
+          <input
+            type="text"
+            id="name"
+            name="name"
+            placeholder="Tu nombre..."
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="email">Correo electrónico</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            placeholder="tu@email.com"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="message">Mensaje</label>
+          <textarea
+            id="message"
+            name="message"
+            placeholder="Cuéntanos más sobre tu proyecto..."
+            required
+          ></textarea>
+        </div>
+        {#if status === "error"}
+          <p class="error-text">
+            Hubo un error al enviar el mensaje. Por favor, inténtalo de nuevo.
+          </p>
+        {/if}
+        <button type="submit" disabled={status === "sending"}>
+          {status === "sending" ? "Enviando..." : "Enviar mensaje"}
+        </button>
+      </form>
+    {/if}
   </div>
 </div>
 
@@ -139,6 +188,38 @@
 
     @media (max-width: 480px) {
       padding: 30px;
+    }
+
+    .success-message {
+      text-align: center;
+      padding: 40px 0;
+
+      h5 {
+        font-family: var(--fontPrimary);
+        font-size: 24px;
+        color: var(--colorPrimary);
+        margin-bottom: 20px;
+      }
+
+      p {
+        font-family: var(--fontSecondary);
+        font-size: 16px;
+        color: var(--colorText2);
+        margin-bottom: 30px;
+      }
+
+      button {
+        width: auto;
+        padding: 15px 30px;
+        font-size: 14px;
+      }
+    }
+
+    .error-text {
+      color: #ff4d4d;
+      font-size: 14px;
+      margin-bottom: 20px;
+      font-family: var(--fontSecondary);
     }
 
     .form-group {

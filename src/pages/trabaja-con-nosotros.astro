@@ -51,57 +51,136 @@ import Layout from "@/layouts/Layout.astro";
           </div>
         </div>
 
-        <div class="form-container">
-          <h3>Envíanos tu CV</h3>
-          <form
-            onsubmit="event.preventDefault(); alert('Gracias por tu interés. Nos pondremos en contacto contigo pronto.')"
+        <div class="form-container" id="cv-form-container">
+          <div id="form-content">
+            <h3>Envíanos tu CV</h3>
+            <form
+              action="https://formspree.io/f/xqkgnzbr"
+              method="POST"
+              id="cv-form"
+            >
+              <div class="form-group">
+                <label for="name">Nombre completo</label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  required
+                  placeholder="Tu nombre..."
+                />
+              </div>
+              <div class="form-group">
+                <label for="email">Email</label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  required
+                  placeholder="tu@email.com"
+                />
+              </div>
+              <div class="form-group">
+                <label for="position">Puesto de interés</label>
+                <select id="position" name="position" required>
+                  <option value="">Selecciona una opción...</option>
+                  <option value="enconfrador">Encofrador/a</option>
+                  <option value="ferrallista">Ferrallista</option>
+                  <option value="capataz">Capataz de obra</option>
+                  <option value="tecnico">Técnico/a de estudios</option>
+                  <option value="otro">Otro perfil</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="message">Cuéntanos sobre tu experiencia</label>
+                <textarea
+                  id="message"
+                  name="message"
+                  rows="4"
+                  placeholder="Breve resumen de tu trayectoria..."></textarea>
+              </div>
+              <div id="form-error" class="error-text" style="display: none;">
+                Hubo un error al enviar tu solicitud. Por favor, inténtalo de
+                nuevo.
+              </div>
+              <button type="submit" class="btn-submit" id="submit-btn"
+                >Enviar candidatura</button
+              >
+            </form>
+          </div>
+          <div
+            id="success-content"
+            style="display: none;"
+            class="success-message"
           >
-            <div class="form-group">
-              <label for="name">Nombre completo</label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                required
-                placeholder="Tu nombre..."
-              />
-            </div>
-            <div class="form-group">
-              <label for="email">Email</label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                required
-                placeholder="tu@email.com"
-              />
-            </div>
-            <div class="form-group">
-              <label for="position">Puesto de interés</label>
-              <select id="position" name="position" required>
-                <option value="">Selecciona una opción...</option>
-                <option value="enconfrador">Encofrador/a</option>
-                <option value="ferrallista">Ferrallista</option>
-                <option value="capataz">Capataz de obra</option>
-                <option value="tecnico">Técnico/a de estudios</option>
-                <option value="otro">Otro perfil</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="message">Cuéntanos sobre tu experiencia</label>
-              <textarea
-                id="message"
-                name="message"
-                rows="4"
-                placeholder="Breve resumen de tu trayectoria..."></textarea>
-            </div>
-            <button type="submit" class="btn-submit">Enviar candidatura</button>
-          </form>
+            <h3>¡Solicitud enviada!</h3>
+            <p>
+              Gracias por tu interés en Altamira Construcciones. Hemos recibido
+              tu información y nos pondremos en contacto contigo pronto si tu
+              perfil encaja con lo que buscamos.
+            </p>
+            <button class="btn-submit" id="reset-btn"
+              >Enviar otra solicitud</button
+            >
+          </div>
         </div>
       </div>
     </section>
   </main>
 </Layout>
+
+<script>
+  const form = document.getElementById("cv-form") as HTMLFormElement;
+  const formContent = document.getElementById("form-content");
+  const successContent = document.getElementById("success-content");
+  const formError = document.getElementById("form-error");
+  const submitBtn = document.getElementById("submit-btn") as HTMLButtonElement;
+  const resetBtn = document.getElementById("reset-btn");
+
+  if (form) {
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Enviando...";
+      }
+      if (formError) formError.style.display = "none";
+
+      const formData = new FormData(form);
+
+      try {
+        const response = await fetch(form.action, {
+          method: form.method,
+          body: formData,
+          headers: {
+            Accept: "application/json",
+          },
+        });
+
+        if (response.ok) {
+          if (formContent) formContent.style.display = "none";
+          if (successContent) successContent.style.display = "block";
+          form.reset();
+        } else {
+          if (formError) formError.style.display = "block";
+        }
+      } catch (error) {
+        if (formError) formError.style.display = "block";
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Enviar candidatura";
+        }
+      }
+    });
+  }
+
+  if (resetBtn) {
+    resetBtn.addEventListener("click", () => {
+      if (successContent) successContent.style.display = "none";
+      if (formContent) formContent.style.display = "block";
+    });
+  }
+</script>
 
 <style lang="scss">
   .hero-section {
@@ -223,6 +302,35 @@ import Layout from "@/layouts/Layout.astro";
         font-size: 22px;
         margin-bottom: 20px;
       }
+    }
+
+    .success-message {
+      text-align: center;
+      padding: 40px 0;
+
+      h3 {
+        color: var(--colorPrimary);
+        margin-bottom: 20px;
+      }
+
+      p {
+        color: var(--colorText2);
+        margin-bottom: 30px;
+        line-height: 1.6;
+      }
+
+      .btn-submit {
+        width: auto;
+        padding: 15px 30px;
+        font-size: 14px;
+      }
+    }
+
+    .error-text {
+      color: #ff4d4d;
+      font-size: 14px;
+      margin-bottom: 20px;
+      font-family: var(--fontSecondary);
     }
 
     .form-group {
