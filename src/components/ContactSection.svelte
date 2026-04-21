@@ -67,7 +67,7 @@
       </div>
     {:else}
       <form
-        action="https://formspree.io/f/xqkgnzbr"
+        action="https://formspree.io/f/mgorlrad"
         method="POST"
         onsubmit={handleSubmit}
       >
