@@ -63,7 +63,6 @@
         <p>
           Gracias por contactar con nosotros. Te responderemos lo antes posible.
         </p>
-        <button onclick={() => (status = "")}>Enviar otro mensaje</button>
       </div>
     {:else}
       <form
